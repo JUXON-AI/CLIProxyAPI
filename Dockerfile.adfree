@@ -1,0 +1,47 @@
+# syntax=docker/dockerfile:1
+FROM oven/bun:1.4.3@sha256:ec06c3b6cea04192ae6770c434f668ca41d343ad19fa6472216c7b48be39c598 AS bun
+
+FROM node:24.19.0-bookworm-slim@sha256:a9f5f7c91a432850b2a8a7797adf5eadb6c733ceed61167806cee7ea7fbc29df AS panel
+COPY --from=bun /usr/local/bin/bun /usr/local/bin/bun
+WORKDIR /panel
+# Both the source revision and archive digest are fixed; no moving release or branch is fetched.
+ADD --checksum=sha256:682ab9337fc09e79cb320768dd7af1d53df65dd12fd7658f75a39a7b5552477f https://codeload.github.com/JUXON-AI/Cli-Proxy-API-Management-Center/tar.gz/bc738d06a0a54b07beb4c0db4a810c7af308f0cd /tmp/panel.tgz
+RUN tar xzf /tmp/panel.tgz --strip-components=1 -C /panel && rm /tmp/panel.tgz
+ENV VERSION=v1.27.2-jx.bc738d0
+RUN bun install --frozen-lockfile && bun run verify
+
+FROM golang:1.27.2-bookworm@sha256:5cf287a799e6b94384bad13d16b14904c531f51ba65792237e122ce42b392f61 AS backend
+ENV GOMAXPROCS=2
+WORKDIR /src
+COPY go.mod go.sum ./
+RUN --mount=type=cache,id=cpa-adfree-gomod,target=/go/pkg/mod go mod download
+COPY . .
+ARG VERSION=8.0.44-jx-adfree
+ARG COMMIT
+ARG BUILD_DATE
+RUN --mount=type=cache,id=cpa-adfree-gomod,target=/go/pkg/mod --mount=type=cache,id=cpa-adfree-gobuild,target=/root/.cache/go-build \
+    test -n "$COMMIT" && test -n "$BUILD_DATE" && \
+    CGO_ENABLED=1 GOOS=linux go build -p 2 -trimpath -buildvcs=false \
+    -ldflags="-s -w -X 'main.Version=${VERSION}' -X 'main.Commit=${COMMIT}' -X 'main.BuildDate=${BUILD_DATE}'" \
+    -o /out/CLIProxyAPI ./cmd/server
+
+FROM debian:bookworm-slim@sha256:99c0b25c46d0214d5a2091092e7908907dcaecd6a962cde0ac700acee222b6f3
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
+WORKDIR /CLIProxyAPI
+COPY --from=backend /out/CLIProxyAPI ./CLIProxyAPI
+COPY config.example.yaml ./config.example.yaml
+COPY --from=panel /panel/dist/index.html ./static/management.html
+COPY LICENSE ./licenses/CLIProxyAPI-LICENSE
+COPY --from=panel /panel/LICENSE ./licenses/Management-Center-LICENSE
+ARG VERSION=8.0.44-jx-adfree
+ARG COMMIT
+ARG BUILD_DATE
+LABEL org.opencontainers.image.source="https://github.com/JUXON-AI/CLIProxyAPI" \
+      org.opencontainers.image.revision="${COMMIT}" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      io.juxon.panel.revision="bc738d06a0a54b07beb4c0db4a810c7af308f0cd" \
+      io.juxon.upstream.version="8.0.44"
+ENV TZ=Asia/Shanghai MANAGEMENT_STATIC_PATH=/CLIProxyAPI/static
+EXPOSE 8317
+CMD ["./CLIProxyAPI"]
