@@ -2,7 +2,7 @@
 
 This fork packages the CLIProxyAPI v8.0.44 backend with an ad-free management panel based on v1.27.2. Provider configuration, both regional Kimi OAuth logins, plugin support, and proxy API behavior are retained. Commercial campaign banners, registration referrals, proxy recommendations, sponsored OAuth presentation, and README promotions are removed. Upstream copyright and licenses are retained.
 
-The panel source is pinned to `JUXON-AI/Cli-Proxy-API-Management-Center@cef87e5d272322cd9c47280ebf042a52d2198f9a`. `Dockerfile.adfree` also verifies the source archive digest, runs the panel tests/lint/build, and includes both licenses in `/CLIProxyAPI/licenses`.
+The panel source is pinned to `JUXON-AI/Cli-Proxy-API-Management-Center@bc738d06a0a54b07beb4c0db4a810c7af308f0cd`. `Dockerfile.adfree` also verifies the source archive digest, runs the panel tests/lint/build, and includes both licenses in `/CLIProxyAPI/licenses`.
 
 ## Build and publish
 
