@@ -1,8 +1,8 @@
 # JUXON-AI ad-free build
 
-This fork packages the CLIProxyAPI v8.0.44 backend with an ad-free management panel based on v1.27.2. Provider configuration, both regional Kimi OAuth logins, plugin support, and proxy API behavior are retained. Commercial campaign banners, registration referrals, proxy recommendations, sponsored OAuth presentation, and README promotions are removed. Upstream copyright and licenses are retained.
+This fork packages the CLIProxyAPI v8.0.76 backend with an ad-free management panel based on v1.28.1. Provider configuration, both regional Kimi OAuth logins, plugin support, and proxy API behavior are retained. Commercial campaign banners, registration referrals, proxy recommendations, sponsored OAuth presentation, and README promotions are removed. Upstream copyright and licenses are retained.
 
-The panel source is pinned to `JUXON-AI/Cli-Proxy-API-Management-Center@bc738d06a0a54b07beb4c0db4a810c7af308f0cd`. `Dockerfile.adfree` also verifies the source archive digest, runs the panel tests/lint/build, and includes both licenses in `/CLIProxyAPI/licenses`.
+The panel source is pinned to `JUXON-AI/Cli-Proxy-API-Management-Center@ae14ab649ed3de5f03a8eb95e8d5839404489692`. `Dockerfile.adfree` also verifies the source archive digest, runs the panel tests/lint/build, and includes both licenses in `/CLIProxyAPI/licenses`.
 
 ## Build and publish
 
@@ -11,7 +11,7 @@ Run on an authorized Linux/amd64 build server using a clean checkout of the inte
 ```sh
 SOURCE_SHA=$(git rev-parse HEAD)
 SHORT_SHA=$(git rev-parse --short=12 HEAD)
-IMAGE=registry.cn-hangzhou.aliyuncs.com/skfskf/claude-proxy:8.0.44-adfree-${SHORT_SHA}
+IMAGE=registry.cn-hangzhou.aliyuncs.com/skfskf/claude-proxy:8.0.76-adfree-${SHORT_SHA}
 docker buildx build --platform linux/amd64 --provenance=false --load \
   --file Dockerfile.adfree \
   --build-arg COMMIT="$SOURCE_SHA" \
